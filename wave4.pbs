@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+#PBS -l walltime=10:00:00,nodes=4:ppn=12:TeslaK40M
+#PBS -N wave_4gpus
+#PBS -q ncsa
+# End of embedded QSUB options
+#
+
+module load anaconda/3
+cd multi-gpu/wave_final
+python3 deepGW_train_multi_gpu_4.py
