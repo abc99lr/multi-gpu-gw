@@ -217,4 +217,4 @@ def train(inputs):
 
 
 inputs = deepGW.read_dataset(phase='train')
-run(inputs)
+train(inputs)
