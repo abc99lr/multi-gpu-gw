@@ -22,7 +22,7 @@ parser.add_argument('--lr', action='store', dest='lr', type=float,
                     help='Learning Rate (default: 0.001)', default=0.001)
 
 parser.add_argument('--snr', action='store', dest='snr', type=float, 
-                    help='Training SNR (default: 0.2)', default=0.2)
+                    help='Training SNR (default: 0.1)', default=0.1)
 
 parser.add_argument('--trsz', action='store', dest='train_step_size', type=int, 
                     help='Training Step Size (default: 256)', default=256)
@@ -39,6 +39,10 @@ parser.add_argument('--step', action='store', dest='num_step', type=int,
 parser.add_argument('--log', action='store', dest='log_device_placement', type=bool, 
                     help='Displace Device Log? (default: False)', default=False)
 
+parser.add_argument('--path', action='store', dest='save_path', type=str, 
+                    help='Path to Save Model & Output (default: /home/ruilan2/scratch/)', 
+                    default='/home/ruilan2/scratch/')
+
 result = parser.parse_args()
 
 lr = result.lr
@@ -48,8 +52,7 @@ test_step_size = result.test_step_size
 num_gpus = result.num_gpus
 log_device_placement = result.log_device_placement
 num_step = result.num_step
-
-
+save_path = result.save_path
 
 
 def tower_loss(scope, inputs, labels):
@@ -74,6 +77,7 @@ def tower_loss(scope, inputs, labels):
 
 
 # borrowed online from tensorflow.org 
+# Reference: https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10_multi_gpu_train.py
 def average_gradients(tower_grads):
 	average_grads = []
 	for grad_and_vars in zip(*tower_grads):
@@ -142,12 +146,7 @@ def train(inputs):
 
 		train_error = []
 		train_acc = []
-		# for epoch in range(num_epoch):
-			
-			# num_step = len(inputs) // (train_step_size * num_gpus)
-			
-			# input_epoch, label_epoch = deepGW.prepare_data(inputs, labels)
-			# input_epoch, label_epoch = deepGW.generate_batch_input(inputs, 'train', snr, train_step_size*num_gpus)
+
 		for step in range(num_step):
 			
 			input_epoch, label_epoch = deepGW.generate_batch_input(inputs, 'train', snr, num_gpus*train_step_size, num_step, step)
@@ -173,14 +172,15 @@ def train(inputs):
 
 				print(format_str % (step, loss_value, acc_value, examples_per_sec, sec_per_batch))
 
-			
+				
 			if step % 1000 == 0 or (step + 1) == num_step:
-				saver.save(sess, '/home/ruilan2/scratch/save_proj_1gpu.ckpt', global_step=step)
+				saver.save(sess, str(save_path) + 'save_proj_1gpu.ckpt', global_step=step)
 			
 
 		print("<<<Training Finished!>>>")
-		sio.savemat('/home/ruilan2/scratch/train_cross_entropy_1gpu.mat', {'cross_entropy': train_error})
-		sio.savemat('/home/ruilan2/scratch/train_accuracy_1gpu.mat', {'accuracy': train_acc})
+
+		sio.savemat(str(save_path) + 'train_cross_entropy.mat', {'cross_entropy': train_error})
+		sio.savemat(str(save_path) + 'train_accuracy.mat', {'accuracy': train_acc})
 
 		data = deepGW.read_dataset(phase='test')
 
@@ -189,6 +189,11 @@ def train(inputs):
 		test_error = []
 		test_acc = []
 
+		with tf.name_scope('Input_test'):
+			X = tf.placeholder(tf.float32, [None, 1, 8192])
+
+		with tf.name_scope('Label_test'):
+			Y_ = tf.placeholder(tf.float32, [None, 1, 2])
 
 		for i in range(29):
 			print("SNR = ", test_snr[i])
@@ -197,25 +202,19 @@ def train(inputs):
 
 			input_batch, label_batch = deepGW.get_a_batch(input_epoch, label_epoch, test_step_size, 1, 0)
 
-			# test = add_noise(testsig, testlabel, 100, test_snr[i], X, Y_)
-			"""
-			with tf.name_scope('Input'):
-				X = tf.placeholder(tf.float32, [None, 1, 8192])
-
-			with tf.name_scope('Label'):
-				Y_ = tf.placeholder(tf.float32, [None, 1, 2])
-			"""
 			m, r = sess.run([loss, accuracy], feed_dict={X: input_batch, Y_: label_batch})
 			print('test:' + ' cross_entropy:' + str(m) + ' accuracy:' + str(r))
 
 			test_error.append(m)
 			test_acc.append(r)
 
-		sio.savemat('/home/ruilan2/scratch/test_cross_entropy_1gpu.mat', {'cross_entropy': test_error})
-		sio.savemat('/home/ruilan2/scratch/test_accuracy_1gpu.mat', {'accuracy': test_acc})
+		print("<<<Testing Finished!>>>")
+
+		sio.savemat(str(save_path) + 'test_cross_entropy.mat', {'cross_entropy': test_error})
+		sio.savemat(str(save_path) + 'test_accuracy.mat', {'accuracy': test_acc})
 	pass
 
 
 
 inputs = deepGW.read_dataset(phase='train')
-train(inputs)
+run(inputs)

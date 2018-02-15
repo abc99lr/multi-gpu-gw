@@ -1,3 +1,12 @@
+"""
+* Python code for supporting the Multi-GPU GW detection 
+* *****************  
+* Author: Rui Lan 
+* Date: Nov 2017 
+* *****************  
+* Update: Feb 2018 
+"""
+
 import tensorflow as tf 
 import h5py 
 import numpy as np 
@@ -17,13 +26,11 @@ def convert_to_tensor_float(inputs):
 
 def get_a_batch(inputs, labels, batch_size, num_gpus, step):
 	
-	#idx = np.random.randint(0, inputs.shape[0], batch_size)
 	input_batch = np.zeros([batch_size, num_gpus, 8192])
 	label_batch = np.zeros([batch_size, num_gpus, 2])
 	
 
 	for gpu in range(num_gpus):
-		#idx = np.random.randint(0, inputs.shape[0], batch_size)
 		for i in range(batch_size):
 			input_batch[i, gpu, :] = inputs[step*num_gpus*batch_size+gpu*batch_size+i]
 			label_batch[i, gpu, :] = labels[step*num_gpus*batch_size+gpu*batch_size+i]
@@ -100,7 +107,7 @@ def generate_batch_input(data, phase, snr, size, num_epoch, epoch):
 	if phase == 'train':
 		snr_end = computer_batch_snr(epoch)
 
-		inputs, labels = generator_r(data, size, snr_end)
+		inputs, labels = generator_f(data, size, snr_end)
 	else:
 		inputs, labels = generator_f(data, size, snr)
 
@@ -131,6 +138,10 @@ def bias_variable(name, shape):
 	    	initializer=tf.constant_initializer(0.1))
 
 	return var
+
+"""
+MODEL #1: 4 Convolution Layers
+"""
 def inference_4conv(inputs):
 	with tf.name_scope('Reshape_layer'):
 		XX = tf.reshape(inputs, [-1, 8192, 1, 1])
@@ -207,6 +218,10 @@ def inference_4conv(inputs):
 
 	return  Y, Y_logits
 
+
+"""
+MODEL #2: 3 Convolution Layers
+"""
 def inference(inputs):
 
 	with tf.name_scope('Reshape_layer'):

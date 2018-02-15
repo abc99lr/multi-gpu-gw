@@ -7,5 +7,5 @@
 #
 
 module load anaconda/3
-cd /home/ruilan2/sp18/initTest
-python3 deepGW_train_multi_gpu_2.py
+cd /home/ruilan2/sp18/multi-gpu-gw
+python3 train.py --ngpu 2

@@ -7,5 +7,5 @@
 #
 
 module load anaconda/3
-cd multi-gpu/wave_final
-python3 deepGW_train_multi_gpu_4.py
+cd /home/ruilan2/sp18/multi-gpu-gw
+python3 train.py --ngpu 4
