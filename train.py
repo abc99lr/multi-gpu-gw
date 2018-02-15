@@ -1,17 +1,56 @@
+"""
+* Python code for training the Multi-GPU GW detection 
+* *****************  
+* Author: Rui Lan 
+* Date: Nov 2017 
+* *****************  
+* Update: Feb 2018 
+"""
+
 
 import tensorflow as tf 
 import deepGW
 import numpy as np 
 import time 
+import argparse 
 import scipy.io as sio
 
-lr = 0.001
-snr = 0.2
-train_step_size = 256
-test_step_size = 256
-num_gpus = 1
-log_device_placement = False
-num_step = 10000
+
+parser = argparse.ArgumentParser(description='Choosing Hyperparameters.')
+
+parser.add_argument('--lr', action='store', dest='lr', type=float, 
+                    help='Learning Rate (default: 0.001)', default=0.001)
+
+parser.add_argument('--snr', action='store', dest='snr', type=float, 
+                    help='Training SNR (default: 0.2)', default=0.2)
+
+parser.add_argument('--trsz', action='store', dest='train_step_size', type=int, 
+                    help='Training Step Size (default: 256)', default=256)
+
+parser.add_argument('--tesz', action='store', dest='test_step_size', type=int, 
+                    help='Testing Step Size (default: 256)', default=256)
+
+parser.add_argument('--ngpu', action='store', dest='num_gpus', type=int, 
+                    help='Number of GPUs used in training (default: 1)', default=1)
+
+parser.add_argument('--step', action='store', dest='num_step', type=int, 
+                    help='Number of Steps (default: 10000)', default=10000)
+
+parser.add_argument('--log', action='store', dest='log_device_placement', type=bool, 
+                    help='Displace Device Log? (default: False)', default=False)
+
+result = parser.parse_args()
+
+lr = result.lr
+snr = result.snr
+train_step_size = result.train_step_size
+test_step_size = result.test_step_size
+num_gpus = result.num_gpus
+log_device_placement = result.log_device_placement
+num_step = result.num_step
+
+
+
 
 def tower_loss(scope, inputs, labels):
 
