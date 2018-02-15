@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#PBS -l walltime=15:00:00,nodes=1:ppn=1:TeslaK80
+#PBS -l walltime=15:00:00,nodes=1:ppn=1:TeslaK40M
 #PBS -N wave_1gpu
 #PBS -q ncsa
 # End of embedded QSUB options
