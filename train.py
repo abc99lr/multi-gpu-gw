@@ -182,36 +182,36 @@ def train(inputs):
 		sio.savemat(str(save_path) + 'train_cross_entropy.mat', {'cross_entropy': train_error})
 		sio.savemat(str(save_path) + 'train_accuracy.mat', {'accuracy': train_acc})
 
-		data = deepGW.read_dataset(phase='test')
+		# data = deepGW.read_dataset(phase='test')
 
-		test_snr = np.linspace(0.2, 3, 29)
+		# test_snr = np.linspace(0.2, 3, 29)
 
-		test_error = []
-		test_acc = []
+		# test_error = []
+		# test_acc = []
 
-		with tf.name_scope('Input_test'):
-			X = tf.placeholder(tf.float32, [None, 1, 8192])
+		# with tf.name_scope('Input_test'):
+		# 	X = tf.placeholder(tf.float32, [None, 1, 8192])
 
-		with tf.name_scope('Label_test'):
-			Y_ = tf.placeholder(tf.float32, [None, 1, 2])
+		# with tf.name_scope('Label_test'):
+		# 	Y_ = tf.placeholder(tf.float32, [None, 1, 2])
 
-		for i in range(29):
-			print("SNR = ", test_snr[i])
+		# for i in range(29):
+		# 	print("SNR = ", test_snr[i])
 
-			input_epoch, label_epoch = deepGW.generate_batch_input(data, 'test', test_snr[i], test_step_size, 0, 0)
+		# 	input_epoch, label_epoch = deepGW.generate_batch_input(data, 'test', test_snr[i], test_step_size, 0, 0)
 
-			input_batch, label_batch = deepGW.get_a_batch(input_epoch, label_epoch, test_step_size, 1, 0)
+		# 	input_batch, label_batch = deepGW.get_a_batch(input_epoch, label_epoch, test_step_size, 1, 0)
 
-			m, r = sess.run([loss, accuracy], feed_dict={X: input_batch, Y_: label_batch})
-			print('test:' + ' cross_entropy:' + str(m) + ' accuracy:' + str(r))
+		# 	m, r = sess.run([loss, accuracy], feed_dict={X: input_batch, Y_: label_batch})
+		# 	print('test:' + ' cross_entropy:' + str(m) + ' accuracy:' + str(r))
 
-			test_error.append(m)
-			test_acc.append(r)
+		# 	test_error.append(m)
+		# 	test_acc.append(r)
 
-		print("<<<Testing Finished!>>>")
+		# print("<<<Testing Finished!>>>")
 
-		sio.savemat(str(save_path) + 'test_cross_entropy.mat', {'cross_entropy': test_error})
-		sio.savemat(str(save_path) + 'test_accuracy.mat', {'accuracy': test_acc})
+		# sio.savemat(str(save_path) + 'test_cross_entropy.mat', {'cross_entropy': test_error})
+		# sio.savemat(str(save_path) + 'test_accuracy.mat', {'accuracy': test_acc})
 	pass
 
 
